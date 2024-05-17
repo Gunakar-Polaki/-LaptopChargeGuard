@@ -58,7 +58,7 @@ if st.button('Stop Monitoring'):
     stop_monitoring()
 
 if st.session_state.monitoring:
-    battery = psutil.battery()
+    battery = psutil.sensors_battery()
     if battery:
         battery_percent = battery.percent
         plugged = battery.power_plugged
