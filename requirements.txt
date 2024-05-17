@@ -1,2 +1,3 @@
-psutil
-boltiot
+boltiot==1.5.3
+psutil==5.8.0
+streamlit==1.5.0
