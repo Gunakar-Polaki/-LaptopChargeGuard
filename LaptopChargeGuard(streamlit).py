@@ -58,9 +58,10 @@ if st.button('Stop Monitoring'):
     stop_monitoring()
 
 if st.session_state.monitoring:
-    battery_percent = psutil.sensors_battery().percent
-    if battery_percent is not None:
-        plugged = psutil.sensors_battery().power_plugged
+    battery = psutil.sensors_battery()
+    if battery:
+        battery_percent = battery.percent
+        plugged = battery.power_plugged
 
         if battery_percent == 100 and plugged:
             st.write("Battery Full - Light and Sound Alert!")
