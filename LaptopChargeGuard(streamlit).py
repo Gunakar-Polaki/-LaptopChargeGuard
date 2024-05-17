@@ -1,5 +1,6 @@
 import time
-import psutil
+import platform
+import os
 from boltiot import Sms, Bolt
 import streamlit as st
 
@@ -58,11 +59,25 @@ if st.button('Stop Monitoring'):
     stop_monitoring()
 
 if st.session_state.monitoring:
-    battery = psutil.sensors_battery()
-    if battery:
-        battery_percent = battery.percent
-        plugged = battery.power_plugged
+    battery_percent = None
+    plugged = None
+    if platform.system() == 'Windows':
+        import psutil
+        battery = psutil.sensors_battery()
+        if battery:
+            battery_percent = battery.percent
+            plugged = battery.power_plugged
+    elif platform.system() == 'Linux':
+        battery_info = os.popen("acpi -b").read()
+        # Parse battery info to get percentage and charging status
+        # Example output: "Battery 0: Charging, 97%, 00:10:05 until charged"
+        if 'Charging' in battery_info or 'Discharging' in battery_info:
+            battery_percent = int(battery_info.split(',')[1].strip().replace('%', ''))
+            plugged = 'Charging' in battery_info
+    else:
+        st.error("Unsupported operating system")
 
+    if battery_percent is not None:
         if battery_percent == 100 and plugged:
             st.write("Battery Full - Light and Sound Alert!")
             if sms:
