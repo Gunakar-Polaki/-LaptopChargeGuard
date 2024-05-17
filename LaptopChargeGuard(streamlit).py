@@ -38,57 +38,60 @@ def start_monitoring():
 def stop_monitoring():
     st.session_state.monitoring = False
 
+
 if st.button('Start Monitoring'):
     st.write("Monitoring started.")
     start_monitoring()
+    
 
 if st.button('Stop Monitoring'):
     st.write("Monitoring stopped.")
     stop_monitoring()
+    
+
 
 if st.session_state.monitoring:
-    try:
-        battery = psutil.sensors_battery()
-        if battery is not None:
-            plugged = battery.power_plugged
-            percent = battery.percent
+    battery = psutil.sensors_battery()
+    percent = battery.percent if battery is not None else None
 
-            if percent == 100 and plugged:
-                st.write("Battery Full - Light and Sound Alert!")
-                response = sms.send_sms("ALERT: Battery Full - Light and Sound Alert!")
-                control_buzzer('0', 'HIGH')  
-                control_led('2', 'HIGH') 
-                time.sleep(10)
-                control_buzzer('0', 'LOW')  
-                control_led('2', 'LOW')  
+    if percent is not None:
+        plugged = battery.power_plugged
 
-            elif 60 <= percent < 100:
-                if plugged:
-                    st.write("Battery between 90-100% and plugged in - Light On")
-                    response = sms.send_sms("ALERT: Battery between 90-100% and plugged in - Light On")
-                    control_led('2', 'HIGH')  
-                    control_buzzer('0', 'LOW') 
-                else:
-                    st.write("Battery between 90-100% and not plugged in - Light Blinking")
-                    response = sms.send_sms("ALERT: Battery between 90-100% and not plugged in - Light Blinking")
-                    for _ in range(blink_count):  
-                        control_led('2', 'HIGH')  
-                        control_buzzer('0', 'HIGH')  
-                        time.sleep(1)  
-                        control_led('2', 'LOW')  
-                        control_buzzer('0', 'LOW')  
-                        time.sleep(1)  
-                    control_led('2', 'LOW')  
+        if percent == 100 and plugged:
+            st.write("Battery Full - Light and Sound Alert!")
+            response = sms.send_sms("ALERT: Battery Full - Light and Sound Alert!")
+            control_buzzer('0', 'HIGH')  
+            control_led('2', 'HIGH') 
+            time.sleep(10)
+            control_buzzer('0', 'LOW')  
+            control_led('2', 'LOW')  
 
+        elif 60 <= percent < 100:
+            if plugged:
+                st.write("Battery between 90-100% and plugged in - Light On")
+                response = sms.send_sms("ALERT: Battery between 90-100% and plugged in - Light On")
+                control_led('2', 'HIGH')  
+                control_buzzer('0', 'LOW') 
             else:
-                st.write("Charging is sufficient or Battery not in the specified range")
-                control_led('1', 'LOW')  
+                st.write("Battery between 90-100% and not plugged in - Light Blinking")
+                response = sms.send_sms("ALERT: Battery between 90-100% and not plugged in - Light Blinking")
+                for _ in range(blink_count):  
+                    control_led('2', 'HIGH')  
+                    control_buzzer('0', 'HIGH')  
+                    time.sleep(1)  
+                    control_led('2', 'LOW')  
+                    control_buzzer('0', 'LOW')  
+                    time.sleep(1)  
                 control_led('2', 'LOW')  
-                control_buzzer('0', 'LOW')  
 
-            time.sleep(interval) 
-            st.experimental_rerun() 
         else:
-            st.warning("Unable to retrieve battery information.")
-    except Exception as e:
-        st.error(f"Error occurred: {e}")
+            st.write("Charging is sufficient or Battery not in the specified range")
+            control_led('1', 'LOW')  
+            control_led('2', 'LOW')  
+            control_buzzer('0', 'LOW')  
+
+    else:
+        st.write("Unable to retrieve battery information.")
+    
+    time.sleep(interval) 
+    st.experimental_rerun()
