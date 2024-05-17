@@ -4,16 +4,19 @@ from boltiot import Sms, Bolt
 import streamlit as st
 
 st.title("Laptop Charge Guard [Battery Monitor with Bolt IoT]")
+
+# Bolt IoT configuration
 API_KEY = st.text_input("Enter your Bolt API Key", "")
 DEVICE_ID = st.text_input("Enter your Bolt Device ID", "")
 TO_NUMBER_INPUT = st.text_input("Enter your mobile number (10 digits)", "")
 TO_NUMBER = f"+91{TO_NUMBER_INPUT}" if TO_NUMBER_INPUT else ""
 
-SID = 'ACe72fa30869d550609f3ecbe95c436110'  
-AUTH_TOKEN = 'ac68f99cff23cf83d9fa891d37c22f73'  
-FROM_NUMBER = '+16362541170' 
+# Twilio configuration
+SID = st.text_input("Enter your Twilio Account SID", "")
+AUTH_TOKEN = st.text_input("Enter your Twilio Auth Token", "")
+FROM_NUMBER = st.text_input("Enter your Twilio Phone Number", "")
 
-if API_KEY and DEVICE_ID and TO_NUMBER:
+if API_KEY and DEVICE_ID and TO_NUMBER and SID and AUTH_TOKEN and FROM_NUMBER:
     mybolt = Bolt(API_KEY, DEVICE_ID)
     sms = Sms(SID, AUTH_TOKEN, TO_NUMBER, FROM_NUMBER)
 else:
@@ -38,17 +41,13 @@ def start_monitoring():
 def stop_monitoring():
     st.session_state.monitoring = False
 
-
 if st.button('Start Monitoring'):
     st.write("Monitoring started.")
     start_monitoring()
-    
 
 if st.button('Stop Monitoring'):
     st.write("Monitoring stopped.")
     stop_monitoring()
-    
-
 
 if st.session_state.monitoring:
     battery = psutil.sensors_battery()
@@ -89,4 +88,4 @@ if st.session_state.monitoring:
         control_buzzer('0', 'LOW')  
 
     time.sleep(interval) 
-    st.experimental_rerun() 
+    st.experimental_rerun()
